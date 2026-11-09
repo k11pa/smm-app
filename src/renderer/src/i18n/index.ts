@@ -16,7 +16,8 @@ const dict = {
     ai_title: 'AI provider', provider: 'Provider', model: 'Model', api_key: 'API key',
     key_saved: 'Key saved (stored encrypted on this computer)', key_none: 'No key yet',
     save_key: 'Save key', remove_key: 'Remove', test: 'Test connection', testing: 'Testing…',
-    test_ok: 'Connection works', get_key: 'Where to get a key'
+    test_ok: 'Connection works', get_key: 'Where to get a key',
+    key_save_error: 'The key was not saved: encryption is unavailable on this computer.'
   },
   ru: {
     appName: 'SMM App',
@@ -31,7 +32,8 @@ const dict = {
     ai_title: 'AI-провайдер', provider: 'Провайдер', model: 'Модель', api_key: 'API-ключ',
     key_saved: 'Ключ сохранён (зашифрован на этом компьютере)', key_none: 'Ключа пока нет',
     save_key: 'Сохранить ключ', remove_key: 'Удалить', test: 'Проверить связь', testing: 'Проверяю…',
-    test_ok: 'Связь работает', get_key: 'Где взять ключ'
+    test_ok: 'Связь работает', get_key: 'Где взять ключ',
+    key_save_error: 'Ключ не сохранён: шифрование недоступно на этом компьютере.'
   },
   he: {
     appName: 'SMM App',
@@ -46,7 +48,8 @@ const dict = {
     ai_title: 'ספק AI', provider: 'ספק', model: 'מודל', api_key: 'מפתח API',
     key_saved: 'המפתח נשמר (מוצפן במחשב זה)', key_none: 'אין מפתח עדיין',
     save_key: 'שמור מפתח', remove_key: 'הסר', test: 'בדוק חיבור', testing: 'בודק…',
-    test_ok: 'החיבור עובד', get_key: 'איפה משיגים מפתח'
+    test_ok: 'החיבור עובד', get_key: 'איפה משיגים מפתח',
+    key_save_error: 'המפתח לא נשמר: הצפנה אינה זמינה במחשב זה.'
   }
 } as const
 

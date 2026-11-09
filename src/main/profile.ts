@@ -93,9 +93,9 @@ const FIELD_SHAPES: Record<string, string> = {
 const shapeFor = (fields: string[]) => `{\n${fields.map((f) => `  ${FIELD_SHAPES[f]}`).join(',\n')}\n}`
 
 // Everything about a brand lives in the brand's language; the interface language never affects it.
-function systemPrompt(contentLanguage: string) {
+export function systemPrompt(contentLanguage: string, task = 'building a brand profile') {
   return [
-    'You are a senior social media strategist building a brand profile for a small or mid-sized business in Israel or Europe.',
+    `You are a senior social media strategist ${task} for a small or mid-sized business in Israel or Europe.`,
     `Write every value in ${languageName(contentLanguage)}, whatever language the website is in, using natural local wording rather than literal translation. Keep proper names as they are. Keep JSON keys in English.`,
     'Hebrew: natural, idiomatic Hebrew, not translated English; gender-neutral or plural forms where the audience is mixed; no niqqud.',
     'Languages with formal and informal address (Sie/du, vous/tu, usted/tú, Lei/tu): choose the form that suits the audience and the stated tone. Prefer formal for B2B, professional or older audiences and informal for consumer or young audiences. Use local spelling and idioms for the stated market.',

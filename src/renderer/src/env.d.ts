@@ -1,5 +1,5 @@
 import type { BrandAnswers, BrandProfile } from '../../main/profile'
-import type { Brand, ChatResult, PlanItem, ProfileSection, ProfileSource, ProviderId, Settings } from '../../shared'
+import type { Brand, ChatResult, MonthStrategy, PlanItem, ProfileSection, ProfileSource, ProviderId, Settings } from '../../shared'
 
 type Failure = { ok: false; error: string }
 type Result<T> = ({ ok: true } & T) | Failure
@@ -33,6 +33,9 @@ declare global {
         create(input: { brandId: number } & PlanItemFields): Promise<Result<{ item: PlanItem }>>
         update(input: { id: number; changes: Partial<PlanItemFields> }): Promise<Result<{ item: PlanItem }>>
         delete(id: number): Promise<Result<{}>>
+        getStrategy(input: { brandId: number; year: number; month: number }): Promise<Result<{ strategy: MonthStrategy | null }>>
+        generate(input: { brandId: number; year: number; month: number; postsPerWeek: number }): Promise<Result<{ strategy: MonthStrategy; created: number }>>
+        regenerateDay(input: { brandId: number; date: string }): Promise<Result<{ created: number }>>
       }
     }
   }

@@ -40,7 +40,7 @@ const SaveInput = z.object({
 
 const chatWith = (maxTokens: number) => (prompt: string, system: string) => chat(prompt, system, undefined, maxTokens)
 
-function currentProfile(db: Db, brandId: number): BrandProfile | null {
+export function currentProfile(db: Db, brandId: number): BrandProfile | null {
   const parsed = ProfileSchema.safeParse(getLatestProfile(db, brandId)?.data)
   return parsed.success ? parsed.data : null
 }

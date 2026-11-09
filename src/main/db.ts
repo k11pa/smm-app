@@ -23,6 +23,24 @@ const MIGRATIONS: string[] = [
     created_at TEXT NOT NULL,
     UNIQUE (brand_id, version)
   );
+  `,
+  `
+  CREATE TABLE plan_items (
+    id INTEGER PRIMARY KEY,
+    brand_id INTEGER NOT NULL REFERENCES brands(id) ON DELETE CASCADE,
+    date TEXT NOT NULL,
+    platform TEXT NOT NULL,
+    format TEXT NOT NULL,
+    pillar TEXT NOT NULL,
+    title TEXT NOT NULL,
+    notes TEXT NOT NULL,
+    source TEXT NOT NULL CHECK (source IN ('ai', 'user')),
+    edited INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );
+
+  CREATE INDEX plan_items_brand_date ON plan_items (brand_id, date);
   `
 ]
 

@@ -26,6 +26,25 @@ export const DEFAULT_MODELS: Record<ProviderId, string[]> = {
 export const PLATFORMS = ['Instagram', 'Facebook', 'TikTok', 'LinkedIn', 'X', 'Telegram'] as const
 export type Platform = (typeof PLATFORMS)[number]
 
+export const POST_FORMATS = ['post', 'carousel', 'reel', 'story', 'video'] as const
+export type PostFormat = (typeof POST_FORMATS)[number]
+
+export interface PlanItem {
+  id: number
+  brandId: number
+  date: string // YYYY-MM-DD
+  platform: Platform
+  format: PostFormat
+  pillar: string
+  title: string
+  notes: string
+  source: ProfileSource
+  // True once the owner changed the item; regeneration must leave it alone.
+  edited: boolean
+  createdAt: string
+  updatedAt: string
+}
+
 export const PROFILE_SECTIONS = ['about', 'audience', 'tone', 'pillars', 'competitors', 'markets', 'platforms', 'goals'] as const
 export type ProfileSection = (typeof PROFILE_SECTIONS)[number]
 

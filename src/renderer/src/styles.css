@@ -42,5 +42,29 @@ button.danger { color: var(--err); }
 .badge { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--bg); border: 1px solid var(--border); }
 .badge.unverified { background: var(--warn-bg); }
 [hidden] { display: none !important; }
+.plan { max-width: 1200px; }
+.plan-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+.plan-title { margin: 0; }
+.plan-title::first-letter { text-transform: uppercase; }
+.row.flush { margin-top: 0; }
+.grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.weekday { background: var(--panel); color: var(--muted); font-size: 12px; font-weight: 600; padding: 8px; text-align: center; text-transform: capitalize; }
+.cell { background: var(--panel); min-height: 108px; padding: 6px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.cell.outside { background: var(--bg); }
+.cell.outside .daynum { color: var(--muted); }
+.cell.drop { outline: 2px solid var(--accent); outline-offset: -2px; }
+.cell-head { display: flex; justify-content: space-between; align-items: center; min-height: 22px; }
+.daynum { font-size: 12px; font-weight: 600; padding: 1px 6px; border-radius: 999px; }
+.cell.today .daynum { background: var(--accent); color: var(--accent-text); }
+button.add { opacity: 0; font-size: 16px; line-height: 1; padding: 0 4px; }
+.cell:hover button.add, button.add:focus-visible { opacity: 1; }
+.chip { display: block; width: 100%; text-align: start; padding: 4px 6px; border-radius: 6px; background: var(--bg); white-space: normal; cursor: grab; font-size: 12px; line-height: 1.3; }
+.chip:active { cursor: grabbing; }
+.chip-meta { display: block; color: var(--muted); font-size: 11px; }
+.chip-title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; }
+.overlay { position: fixed; inset: 0; background: rgb(0 0 0 / .45); display: flex; align-items: center; justify-content: center; padding: 24px; z-index: 10; }
+.dialog { width: 100%; max-width: 480px; max-height: 100%; overflow: auto; }
+.dialog h2 { margin-bottom: 4px; }
+.push { margin-inline-start: auto; }
 .output { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 12px; }
 .output pre { white-space: pre-wrap; font-family: inherit; margin: 0 0 10px; line-height: 1.5; }

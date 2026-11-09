@@ -13,6 +13,12 @@ const api = {
     generate: (input: unknown) => ipcRenderer.invoke('brand:generate', input),
     regenerateSection: (input: unknown) => ipcRenderer.invoke('brand:regenerateSection', input),
     save: (input: unknown) => ipcRenderer.invoke('brand:save', input)
+  },
+  plan: {
+    list: (input: unknown) => ipcRenderer.invoke('plan:list', input),
+    create: (input: unknown) => ipcRenderer.invoke('plan:create', input),
+    update: (input: unknown) => ipcRenderer.invoke('plan:update', input),
+    delete: (id: number) => ipcRenderer.invoke('plan:delete', id)
   }
 }
 

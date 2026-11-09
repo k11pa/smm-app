@@ -1,8 +1,10 @@
 import type { BrandAnswers, BrandProfile } from '../../main/profile'
-import type { Brand, ChatResult, ProfileSection, ProfileSource, ProviderId, Settings } from '../../shared'
+import type { Brand, ChatResult, PlanItem, ProfileSection, ProfileSource, ProviderId, Settings } from '../../shared'
 
 type Failure = { ok: false; error: string }
 type Result<T> = ({ ok: true } & T) | Failure
+
+export type PlanItemFields = Pick<PlanItem, 'date' | 'platform' | 'format' | 'pillar' | 'title' | 'notes'>
 
 export interface BrandFields {
   name: string
@@ -25,6 +27,12 @@ declare global {
         generate(input: BrandFields & { answers: BrandAnswers; siteText?: string }): Promise<Result<{ data: BrandProfile }>>
         regenerateSection(input: { name: string; contentLanguage: string; section: ProfileSection; profile: BrandProfile }): Promise<Result<{ data: Partial<BrandProfile> }>>
         save(input: BrandFields & { brandId: number | null; profile: BrandProfile; source: ProfileSource }): Promise<Result<{ brand: Brand; version: number }>>
+      }
+      plan: {
+        list(input: { brandId: number; from: string; to: string }): Promise<Result<{ items: PlanItem[] }>>
+        create(input: { brandId: number } & PlanItemFields): Promise<Result<{ item: PlanItem }>>
+        update(input: { id: number; changes: Partial<PlanItemFields> }): Promise<Result<{ item: PlanItem }>>
+        delete(id: number): Promise<Result<{}>>
       }
     }
   }

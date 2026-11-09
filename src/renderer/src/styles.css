@@ -30,5 +30,17 @@ a { color: var(--accent); }
 .muted { color: var(--muted); } .small { font-size: 12px; margin: 0; }
 .ok { color: var(--ok); } .error { color: var(--err); }
 .warn { background: var(--warn-bg); padding: 8px 12px; border-radius: 8px; }
+h2:has(+ *) { margin-bottom: 12px; }
+.spaced { margin-top: 10px; }
+.section-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.section-head h2 { margin-bottom: 4px; }
+.subcard { border: 1px solid var(--border); border-radius: 10px; padding: 4px 14px 12px; margin-top: 12px; }
+.checks { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+label.check { display: flex; align-items: center; gap: 6px; margin: 0; font-weight: 400; cursor: pointer; }
+input[type='checkbox'] { width: auto; margin: 0; }
+button.danger { color: var(--err); }
+.badge { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--bg); border: 1px solid var(--border); }
+.badge.unverified { background: var(--warn-bg); }
+[hidden] { display: none !important; }
 .output { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 12px; }
 .output pre { white-space: pre-wrap; font-family: inherit; margin: 0 0 10px; line-height: 1.5; }

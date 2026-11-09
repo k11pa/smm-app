@@ -43,6 +43,17 @@ export function createBrand(db: Db, input: { name: string; website?: string | nu
   return getBrand(db, Number(lastInsertRowid))!
 }
 
+export function updateBrand(db: Db, id: number, input: { name: string; website?: string | null; contentLanguage: string }): Brand {
+  db.prepare('UPDATE brands SET name = ?, website = ?, content_language = ?, updated_at = ? WHERE id = ?').run(
+    input.name,
+    input.website ?? null,
+    input.contentLanguage,
+    new Date().toISOString(),
+    id
+  )
+  return getBrand(db, id)!
+}
+
 export function getBrand(db: Db, id: number): Brand | null {
   const row = db.prepare('SELECT * FROM brands WHERE id = ?').get(id) as BrandRow | undefined
   return row ? toBrand(row) : null

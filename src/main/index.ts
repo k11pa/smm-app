@@ -3,6 +3,15 @@ import { join } from 'path'
 import { chat } from './ai'
 import { getSettings, setKey, updateSettings } from './store'
 
+// Only web links may leave the app: file:, ms-*: and similar schemes can launch local programs.
+function isWebUrl(url: string) {
+  try {
+    return ['http:', 'https:'].includes(new URL(url).protocol)
+  } catch {
+    return false
+  }
+}
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
@@ -14,7 +23,7 @@ function createWindow() {
     webPreferences: { preload: join(__dirname, '../preload/index.js'), contextIsolation: true, sandbox: false }
   })
   win.webContents.setWindowOpenHandler(({ url }) => {
-    shell.openExternal(url)
+    if (isWebUrl(url)) shell.openExternal(url)
     return { action: 'deny' }
   })
   if (process.env.ELECTRON_RENDERER_URL) win.loadURL(process.env.ELECTRON_RENDERER_URL)

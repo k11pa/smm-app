@@ -5,6 +5,7 @@
   "main": "out/main/index.js",
   "private": true,
   "scripts": {
+    "postinstall": "install-electron",
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "typecheck": "tsc --noEmit -p tsconfig.json",
@@ -24,12 +25,12 @@
     "@types/node": "^22.20.5",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
-    "@vitejs/plugin-react": "^4.7.0",
-    "electron": "^33.4.11",
-    "electron-builder": "^25.1.8",
-    "electron-vite": "^2.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "electron": "^45.2.3",
+    "electron-builder": "^26.18.0",
+    "electron-vite": "^6.0.0",
     "typescript": "^5.9.3",
-    "vite": "^5.4.21"
+    "vite": "^8.3.6"
   },
   "dependencies": {
     "react": "^18.3.1",

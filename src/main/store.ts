@@ -5,6 +5,9 @@ import { DEFAULT_MODELS, ProviderId, Settings } from '../shared'
 
 const file = () => join(app.getPath('userData'), 'settings.json')
 
+const ENC_PREFIX = 'enc:'
+const isEncrypted = (v: string | undefined): v is string => !!v?.startsWith(ENC_PREFIX)
+
 interface Stored {
   language: Settings['language']
   provider: ProviderId
@@ -39,7 +42,7 @@ export function getSettings(): Settings {
     ai: {
       provider: s.provider,
       model: s.model,
-      hasKey: { anthropic: !!s.keys.anthropic, openai: !!s.keys.openai, gemini: !!s.keys.gemini }
+      hasKey: { anthropic: isEncrypted(s.keys.anthropic), openai: isEncrypted(s.keys.openai), gemini: isEncrypted(s.keys.gemini) }
     }
   }
 }
@@ -53,10 +56,9 @@ export function setKey(provider: ProviderId, key: string | null) {
   const s = load()
   if (!key) delete s.keys[provider]
   else {
-    const enc = safeStorage.isEncryptionAvailable()
-      ? 'enc:' + safeStorage.encryptString(key).toString('base64')
-      : 'raw:' + Buffer.from(key).toString('base64')
-    s.keys[provider] = enc
+    // Never store a key unencrypted: fail so the UI can tell the user.
+    if (!safeStorage.isEncryptionAvailable()) throw new Error('ENCRYPTION_UNAVAILABLE')
+    s.keys[provider] = ENC_PREFIX + safeStorage.encryptString(key).toString('base64')
   }
   save(s)
   return getSettings()
@@ -64,7 +66,10 @@ export function setKey(provider: ProviderId, key: string | null) {
 
 export function getKey(provider: ProviderId): string | null {
   const v = load().keys[provider]
-  if (!v) return null
-  const buf = Buffer.from(v.slice(4), 'base64')
-  return v.startsWith('enc:') ? safeStorage.decryptString(buf) : buf.toString()
+  if (!isEncrypted(v)) return null
+  try {
+    return safeStorage.decryptString(Buffer.from(v.slice(ENC_PREFIX.length), 'base64'))
+  } catch {
+    return null // e.g. settings copied from another Windows user: the key must be re-entered
+  }
 }

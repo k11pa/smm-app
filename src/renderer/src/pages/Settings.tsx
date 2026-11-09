@@ -46,7 +46,15 @@ export default function SettingsPage({ settings, onChange }: { settings: Setting
         </p>
         <div className="row">
           <input type="password" value={key} placeholder="sk-…" onChange={(e) => setKey(e.target.value)} />
-          <button className="primary" disabled={!key.trim()} onClick={async () => { onChange(await window.api.setKey(provider, key.trim())); setKey(''); setTest({}) }}>{t('save_key')}</button>
+          <button className="primary" disabled={!key.trim()} onClick={async () => {
+            try {
+              onChange(await window.api.setKey(provider, key.trim()))
+              setKey('')
+              setTest({})
+            } catch {
+              setTest({ ok: false, msg: t('key_save_error') })
+            }
+          }}>{t('save_key')}</button>
           {settings.ai.hasKey[provider] && <button onClick={async () => onChange(await window.api.setKey(provider, null))}>{t('remove_key')}</button>}
         </div>
 

@@ -9,11 +9,13 @@
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
     "dist:win": "electron-vite build && electron-builder --win"
   },
   "build": {
     "appId": "com.smmapp.desktop",
     "productName": "SMM App",
+    "npmRebuild": false,
     "files": [
       "out/**/*"
     ],
@@ -22,6 +24,7 @@
     }
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^22.20.5",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
@@ -30,9 +33,11 @@
     "electron-builder": "^26.18.0",
     "electron-vite": "^6.0.0",
     "typescript": "^5.9.3",
-    "vite": "^8.3.6"
+    "vite": "^8.3.6",
+    "vitest": "^5.1.0"
   },
   "dependencies": {
+    "better-sqlite3": "^13.0.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   }

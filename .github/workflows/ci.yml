@@ -22,8 +22,10 @@ jobs:
           node-version: 22
           cache: npm
 
+      # Skips the Electron binary download: these steps don't run Electron, and
+      # GitHub's release downloads time out (504) often enough to fail the job.
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: Typecheck
         run: npm run typecheck

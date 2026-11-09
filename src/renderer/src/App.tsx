@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { Settings } from '../../shared'
 import { I18nContext, TKey, translate } from './i18n'
+import Brand from './pages/Brand'
 import Home from './pages/Home'
 import SettingsPage from './pages/Settings'
 
@@ -43,7 +44,11 @@ export default function App() {
         <main className="content">
           {page === 'home' && <Home settings={settings} goSettings={() => setPage('settings')} />}
           {page === 'settings' && <SettingsPage settings={settings} onChange={setSettings} />}
-          {!['home', 'settings'].includes(page) && (
+          {/* Stays mounted: leaving the page must not lose an unsaved draft or a running generation. */}
+          <div hidden={page !== 'brand'}>
+            <Brand settings={settings} goSettings={() => setPage('settings')} />
+          </div>
+          {!['home', 'brand', 'settings'].includes(page) && (
             <div className="card"><h2>{t(NAV.find((n) => n.id === page)!.label)}</h2><p className="muted">{t('soon')}</p></div>
           )}
         </main>

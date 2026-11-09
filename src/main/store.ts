@@ -1,7 +1,7 @@
 import { app, safeStorage } from 'electron'
 import { existsSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
-import { DEFAULT_MODELS, ProviderId, Settings } from '../shared'
+import { DEFAULT_MODELS, INTERFACE_LANGUAGES, ProviderId, Settings } from '../shared'
 
 const file = () => join(app.getPath('userData'), 'settings.json')
 
@@ -38,7 +38,8 @@ function save(s: Stored) {
 export function getSettings(): Settings {
   const s = load()
   return {
-    language: s.language,
+    // A saved language may no longer be offered; the Settings dropdown would otherwise show it blank.
+    language: INTERFACE_LANGUAGES.some((l) => l.code === s.language) ? s.language : defaults.language,
     ai: {
       provider: s.provider,
       model: s.model,

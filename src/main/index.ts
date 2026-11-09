@@ -1,6 +1,7 @@
 import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import { join } from 'path'
 import { chat } from './ai'
+import { registerBrandIpc } from './brandIpc'
 import { Db, openDb } from './db'
 import { getSettings, setKey, updateSettings } from './store'
 
@@ -38,6 +39,7 @@ ipcMain.handle('settings:update', (_e, patch) => updateSettings(patch))
 ipcMain.handle('settings:setKey', (_e, provider, key) => setKey(provider, key))
 ipcMain.handle('ai:chat', (_e, prompt: string, system?: string) => chat(prompt, system))
 ipcMain.handle('ai:test', (_e, provider, model) => chat('Reply with the single word: OK', '', { provider, model }))
+registerBrandIpc(() => db!)
 
 app.whenReady().then(() => {
   try {

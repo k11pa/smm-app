@@ -3,6 +3,7 @@ import { join } from 'path'
 import { chat } from './ai'
 import { registerBrandIpc } from './brandIpc'
 import { Db, openDb } from './db'
+import { registerPlanIpc } from './planIpc'
 import { getSettings, setKey, updateSettings } from './store'
 
 let db: Db | null = null
@@ -40,6 +41,7 @@ ipcMain.handle('settings:setKey', (_e, provider, key) => setKey(provider, key))
 ipcMain.handle('ai:chat', (_e, prompt: string, system?: string) => chat(prompt, system))
 ipcMain.handle('ai:test', (_e, provider, model) => chat('Reply with the single word: OK', '', { provider, model }))
 registerBrandIpc(() => db!)
+registerPlanIpc(() => db!)
 
 app.whenReady().then(() => {
   try {

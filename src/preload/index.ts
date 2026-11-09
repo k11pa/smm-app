@@ -22,6 +22,11 @@ const api = {
     getStrategy: (input: unknown) => ipcRenderer.invoke('plan:getStrategy', input),
     generate: (input: unknown) => ipcRenderer.invoke('plan:generate', input),
     regenerateDay: (input: unknown) => ipcRenderer.invoke('plan:regenerateDay', input)
+  },
+  post: {
+    get: (planItemId: number) => ipcRenderer.invoke('post:get', planItemId),
+    generate: (planItemId: number) => ipcRenderer.invoke('post:generate', planItemId),
+    save: (input: unknown) => ipcRenderer.invoke('post:save', input)
   }
 }
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { Settings } from '../../shared'
 import { I18nContext, TKey, translate } from './i18n'
 import Brand from './pages/Brand'
+import Content from './pages/Content'
 import Home from './pages/Home'
 import Plan from './pages/Plan'
 import SettingsPage from './pages/Settings'
@@ -20,6 +21,7 @@ const NAV: { id: Page; label: TKey }[] = [
 export default function App() {
   const [settings, setSettings] = useState<Settings | null>(null)
   const [page, setPage] = useState<Page>('home')
+  const [contentItemId, setContentItemId] = useState<number | null>(null)
 
   useEffect(() => { window.api.getSettings().then(setSettings) }, [])
   useEffect(() => {
@@ -49,8 +51,9 @@ export default function App() {
           <div hidden={page !== 'brand'}>
             <Brand settings={settings} goSettings={() => setPage('settings')} />
           </div>
-          {page === 'plan' && <Plan settings={settings} goBrand={() => setPage('brand')} />}
-          {!['home', 'brand', 'plan', 'settings'].includes(page) && (
+          {page === 'plan' && <Plan settings={settings} goBrand={() => setPage('brand')} onWrite={(id) => { setContentItemId(id); setPage('content') }} />}
+          {page === 'content' && <Content settings={settings} focusItemId={contentItemId} goPlan={() => setPage('plan')} goBrand={() => setPage('brand')} />}
+          {!['home', 'brand', 'plan', 'content', 'settings'].includes(page) && (
             <div className="card"><h2>{t(NAV.find((n) => n.id === page)!.label)}</h2><p className="muted">{t('soon')}</p></div>
           )}
         </main>

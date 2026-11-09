@@ -4,6 +4,7 @@ import { chat } from './ai'
 import { registerBrandIpc } from './brandIpc'
 import { Db, openDb } from './db'
 import { registerPlanIpc } from './planIpc'
+import { registerPostIpc } from './postIpc'
 import { getSettings, setKey, updateSettings } from './store'
 
 let db: Db | null = null
@@ -42,6 +43,7 @@ ipcMain.handle('ai:chat', (_e, prompt: string, system?: string) => chat(prompt, 
 ipcMain.handle('ai:test', (_e, provider, model) => chat('Reply with the single word: OK', '', { provider, model }))
 registerBrandIpc(() => db!)
 registerPlanIpc(() => db!)
+registerPostIpc(() => db!)
 
 app.whenReady().then(() => {
   try {

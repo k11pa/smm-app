@@ -11,6 +11,12 @@ export interface Settings {
   ai: AiSettings
 }
 
+// Languages offered in Settings. Hebrew strings and RTL support stay in the code; add 'he' here to bring it back.
+export const INTERFACE_LANGUAGES: { code: Settings['language']; name: string }[] = [
+  { code: 'en', name: 'English' },
+  { code: 'ru', name: 'Русский' }
+]
+
 export const DEFAULT_MODELS: Record<ProviderId, string[]> = {
   anthropic: ['claude-haiku-5-5', 'claude-sonnet-5-5', 'claude-opus-5-5'],
   openai: ['gpt-4o-mini', 'gpt-4o'],

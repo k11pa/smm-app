@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { DEFAULT_MODELS, ProviderId, Settings } from '../../../shared'
+import { DEFAULT_MODELS, INTERFACE_LANGUAGES, ProviderId, Settings } from '../../../shared'
 import { useT } from '../i18n'
 
 const PROVIDERS: { id: ProviderId; name: string; keyUrl: string }[] = [
@@ -23,9 +23,7 @@ export default function SettingsPage({ settings, onChange }: { settings: Setting
         <h2>{t('settings_title')}</h2>
         <label>{t('language')}</label>
         <select value={settings.language} onChange={(e) => update({ language: e.target.value as Settings['language'] })}>
-          <option value="en">English</option>
-          <option value="he">עברית</option>
-          <option value="ru">Русский</option>
+          {INTERFACE_LANGUAGES.map((l) => <option key={l.code} value={l.code}>{l.name}</option>)}
         </select>
       </div>
 

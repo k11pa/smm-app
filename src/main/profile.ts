@@ -92,12 +92,25 @@ const FIELD_SHAPES: Record<string, string> = {
 
 const shapeFor = (fields: string[]) => `{\n${fields.map((f) => `  ${FIELD_SHAPES[f]}`).join(',\n')}\n}`
 
-function systemPrompt(contentLanguage: string) {
+interface Languages {
+  // The language the owner reads and works in, taken from the interface setting.
+  workingLanguage: string
+  // The language the brand publishes in.
+  contentLanguage: string
+}
+
+function systemPrompt({ workingLanguage, contentLanguage }: Languages) {
+  const working = languageName(workingLanguage)
+  const content = languageName(contentLanguage)
   return [
     'You are a senior social media strategist building a brand profile for a small or mid-sized business in Israel or Europe.',
-    `Write every value in ${languageName(contentLanguage)}, using natural local wording rather than literal translation. Keep JSON keys in English.`,
-    'Hebrew: write directly in natural, idiomatic Hebrew, not translated English; use gender-neutral or plural forms where the audience is mixed; no niqqud.',
-    'Languages with formal and informal address (Sie/du, vous/tu, usted/tú, Lei/tu): choose the form that suits the audience and the stated tone. Prefer formal for B2B, professional or older audiences and informal for consumer or young audiences. Use local spelling and idioms for the stated market.',
+    `The owner works in ${working}, and the brand publishes in ${content}. These can differ, and each has its own use:`,
+    `- Write every value in ${working}, whatever language the owner's answers or the website are in, because the owner reads and edits this profile. Translate facts from other languages. Keep proper names as they are. Keep JSON keys in English.`,
+    `- The one exception: sample sentences in tone "examples" are written in ${content}, because they show how the published posts will sound.`,
+    `- Tone guidance, written in ${working}, describes how to write in ${content}, including the form of address.`,
+    `When writing in ${content}, use natural local wording rather than literal translation:`,
+    '- Hebrew: natural, idiomatic Hebrew, not translated English; gender-neutral or plural forms where the audience is mixed; no niqqud.',
+    '- Languages with formal and informal address (Sie/du, vous/tu, usted/tú, Lei/tu): choose the form that suits the audience and the stated tone. Prefer formal for B2B, professional or older audiences and informal for consumer or young audiences. Use local spelling and idioms for the stated market.',
     'Respond with a single JSON object and nothing else: no markdown, no commentary.',
     'Accuracy rules:',
     '- Use only facts from the owner\'s answers and the website text. Where something is unknown, leave lists empty or word the value as a suggestion to confirm. Never state it as a fact about this business.',
@@ -205,8 +218,8 @@ export function parseSuggestedAnswers(text: string): BrandAnswers {
   })
 }
 
-export const buildProfilePrompts = (input: { name: string; website?: string | null; contentLanguage: string; answers: BrandAnswers; siteText?: string }) => ({
-  system: systemPrompt(input.contentLanguage),
+export const buildProfilePrompts = (input: Languages & { name: string; website?: string | null; answers: BrandAnswers; siteText?: string }) => ({
+  system: systemPrompt(input),
   prompt: [
     `Build the brand profile for "${input.name}"${input.website ? ` (${input.website})` : ''}.`,
     '',
@@ -218,8 +231,8 @@ export const buildProfilePrompts = (input: { name: string; website?: string | nu
   ].join('\n')
 })
 
-export const buildSectionPrompts = (input: { name: string; contentLanguage: string; section: ProfileSection; profile: BrandProfile }) => ({
-  system: systemPrompt(input.contentLanguage),
+export const buildSectionPrompts = (input: Languages & { name: string; section: ProfileSection; profile: BrandProfile }) => ({
+  system: systemPrompt(input),
   prompt: [
     `Rewrite one section of the brand profile for "${input.name}" with a fresh angle, using only facts already in the profile. Do not add new facts, keep the owner's wording where it is specific, and stay consistent with the rest of the profile.`,
     '',
@@ -230,10 +243,10 @@ export const buildSectionPrompts = (input: { name: string; contentLanguage: stri
   ].join('\n')
 })
 
-export const buildSuggestPrompts = (input: { name: string; contentLanguage: string; siteText: string }) => ({
-  system: systemPrompt(input.contentLanguage),
+export const buildSuggestPrompts = (input: Languages & { name: string; siteText: string }) => ({
+  system: systemPrompt(input),
   prompt: [
-    `Read the website of "${input.name}" and fill in what it actually states. Use an empty string for anything the site does not state; do not guess.`,
+    `Read the website of "${input.name}" and fill in what it actually states. Use an empty string for anything the site does not state; do not guess. Write only the answer itself, with no remarks about where it came from or how sure you are.`,
     siteBlock(input.siteText),
     'Return JSON in exactly this shape, with string values:',
     '{ "business": "", "products": "", "audience": "", "markets": "", "tone": "" }'

@@ -17,6 +17,7 @@ import {
   parseSuggestedAnswers
 } from './profile'
 import { fetchSiteText } from './site'
+import { getSettings } from './store'
 
 const PROFILE_MAX_TOKENS = 6000
 const SHORT_MAX_TOKENS = 2500
@@ -38,6 +39,7 @@ const SaveInput = z.object({
   source: z.enum(['ai', 'user'])
 })
 
+const workingLanguage = () => getSettings().language
 const chatWith = (maxTokens: number) => (prompt: string, system: string) => chat(prompt, system, undefined, maxTokens)
 
 // Input crosses a process boundary, so it is validated here even though our own UI sent it.
@@ -68,15 +70,19 @@ export function registerBrandIpc(getDb: () => Db) {
   handle('brand:fetchSite', z.string().max(500), (url) => fetchSiteText(url))
 
   handle('brand:suggestAnswers', SuggestInput, (input) =>
-    askJson(chatWith(SHORT_MAX_TOKENS), buildSuggestPrompts(input), parseSuggestedAnswers)
+    askJson(chatWith(SHORT_MAX_TOKENS), buildSuggestPrompts({ ...input, workingLanguage: workingLanguage() }), parseSuggestedAnswers)
   )
 
   handle('brand:generate', GenerateInput, (input) =>
-    askJson(chatWith(PROFILE_MAX_TOKENS), buildProfilePrompts(input), (text) => parseGeneratedProfile(text, input.answers))
+    askJson(chatWith(PROFILE_MAX_TOKENS), buildProfilePrompts({ ...input, workingLanguage: workingLanguage() }), (text) =>
+      parseGeneratedProfile(text, input.answers)
+    )
   )
 
   handle('brand:regenerateSection', SectionInput, (input) =>
-    askJson(chatWith(PROFILE_MAX_TOKENS), buildSectionPrompts(input), (text) => parseSection(text, input.section, input.profile))
+    askJson(chatWith(PROFILE_MAX_TOKENS), buildSectionPrompts({ ...input, workingLanguage: workingLanguage() }), (text) =>
+      parseSection(text, input.section, input.profile)
+    )
   )
 
   handle('brand:save', SaveInput, (input) => {

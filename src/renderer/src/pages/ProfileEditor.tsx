@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react'
 import type { BrandProfile } from '../../../main/profile'
-import type { Brand, ProfileSection, ProfileSource, Settings } from '../../../shared'
+import { Brand, CONTENT_LANGUAGES, ProfileSection, ProfileSource, Settings } from '../../../shared'
 import type { BrandFields } from '../env'
 import { TKey, useT } from '../i18n'
 import { PlatformPicker, useErrorText } from './Brand'
@@ -110,6 +110,7 @@ export default function ProfileEditor(props: {
           <div>
             <h2 dir="auto">{fields.name}</h2>
             <p className="muted small" dir="auto">{fields.website ?? t('no_website')}</p>
+            <p className="muted small">{t('content_language')}: {CONTENT_LANGUAGES.find((l) => l.code === fields.contentLanguage)?.native ?? fields.contentLanguage}</p>
           </div>
           <button onClick={() => { if (!dirty || window.confirm(t('start_over_confirm'))) onStartOver() }}>{t('start_over')}</button>
         </div>

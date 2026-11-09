@@ -1,7 +1,10 @@
-import { app, BrowserWindow, ipcMain, shell } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import { join } from 'path'
 import { chat } from './ai'
+import { Db, openDb } from './db'
 import { getSettings, setKey, updateSettings } from './store'
+
+let db: Db | null = null
 
 // Only web links may leave the app: file:, ms-*: and similar schemes can launch local programs.
 function isWebUrl(url: string) {
@@ -36,7 +39,17 @@ ipcMain.handle('settings:setKey', (_e, provider, key) => setKey(provider, key))
 ipcMain.handle('ai:chat', (_e, prompt: string, system?: string) => chat(prompt, system))
 ipcMain.handle('ai:test', (_e, provider, model) => chat('Reply with the single word: OK', '', { provider, model }))
 
-app.whenReady().then(createWindow)
+app.whenReady().then(() => {
+  try {
+    db = openDb(join(app.getPath('userData'), 'smm.db'))
+  } catch (e: any) {
+    dialog.showErrorBox('SMM App', `Could not open the local database.\n\n${e?.message ?? e}`)
+    app.quit()
+    return
+  }
+  createWindow()
+})
+app.on('will-quit', () => db?.close())
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })

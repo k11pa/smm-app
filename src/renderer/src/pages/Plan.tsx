@@ -34,6 +34,8 @@ export default function Plan({ settings, goBrand }: { settings: Settings; goBran
   const [generating, setGenerating] = useState(false)
   const [notice, setNotice] = useState('')
   const [reloadTick, setReloadTick] = useState(0)
+  const [itemsTick, setItemsTick] = useState(0)
+  const [regeneratingDay, setRegeneratingDay] = useState<string | null>(null)
   const errorText = useErrorText()
   const hasKey = settings.ai.hasKey[settings.ai.provider]
 
@@ -63,13 +65,13 @@ export default function Plan({ settings, goBrand }: { settings: Settings; goBran
       else setError(r.error)
     })
     return () => { current = false }
-  }, [brand, from, to, reloadTick])
+  }, [brand, from, to, reloadTick, itemsTick])
+
+  useEffect(() => setNotice(''), [view])
 
   useEffect(() => {
     if (!brand) return
     let current = true
-    setStrategy(null)
-    setNotice('')
     window.api.plan.getStrategy({ brandId: brand.id, year: view.year, month: view.month }).then((r) => {
       if (current && r.ok) setStrategy(r.strategy)
     })
@@ -90,6 +92,17 @@ export default function Plan({ settings, goBrand }: { settings: Settings; goBran
     if (!r.ok) return setError(errorText(r.error))
     setReloadTick((n) => n + 1)
     setNotice(`${t('plan_generated')}: ${r.created}`)
+  }
+
+  async function regenerateDay(date: string) {
+    if (!brand) return
+    const hasUntouched = items.some((i) => i.date === date && i.source === 'ai' && !i.edited)
+    if (hasUntouched && !window.confirm(t('plan_day_confirm'))) return
+    setRegeneratingDay(date); setError(''); setNotice('')
+    const r = await window.api.plan.regenerateDay({ brandId: brand.id, date })
+    setRegeneratingDay(null)
+    if (!r.ok) return setError(errorText(r.error))
+    setItemsTick((n) => n + 1)
   }
 
   const formatDay = (options: Intl.DateTimeFormatOptions, iso: string) =>
@@ -183,7 +196,7 @@ export default function Plan({ settings, goBrand }: { settings: Settings; goBran
         <div className="row flush plan-generate">
           <label className="inline" htmlFor="posts-per-week">{t('plan_posts_per_week')}</label>
           <input id="posts-per-week" type="number" min={1} max={14} value={postsPerWeek} onChange={(e) => setPostsPerWeek(Math.min(14, Math.max(1, Number(e.target.value) || 1)))} />
-          <button className="primary" disabled={generating || !hasKey || !profile || monthIsPast} onClick={generate}>
+          <button className="primary" disabled={generating || !!regeneratingDay || !hasKey || !profile || monthIsPast} onClick={generate}>
             {generating ? t('plan_generating') : strategy ? t('plan_regenerate') : t('plan_generate')}
           </button>
           {!generating && notice && <span className="ok">{notice}</span>}
@@ -204,7 +217,20 @@ export default function Plan({ settings, goBrand }: { settings: Settings; goBran
           >
             <div className="cell-head">
               <span className="daynum">{Number(date.slice(8))}</span>
-              <button className="link add" aria-label={`${t('plan_add')}: ${date}`} onClick={() => setEditing({ date })}>+</button>
+              <div className="day-actions">
+                {date >= today && profile && (
+                  <button
+                    className={regeneratingDay === date ? 'link add busy' : 'link add'}
+                    aria-label={`${t('plan_day_regen')}: ${date}`}
+                    title={hasKey ? t('plan_day_regen') : t('no_key')}
+                    disabled={!!regeneratingDay || generating || !hasKey}
+                    onClick={() => regenerateDay(date)}
+                  >
+                    {regeneratingDay === date ? '…' : '↻'}
+                  </button>
+                )}
+                <button className="link add" aria-label={`${t('plan_add')}: ${date}`} onClick={() => setEditing({ date })}>+</button>
+              </div>
             </div>
             {items.filter((i) => i.date === date).map((i) => (
               <button

@@ -4,8 +4,8 @@ import { join } from 'path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { createBrand } from './brands'
 import { Db, openDb } from './db'
-import { createItem, getStrategy, listItems, saveGeneratedPlan, updateItem } from './plan'
-import { PlanContext, availableDates, buildPlanPrompts, monthKey, monthRange, parsePlan, targetCount } from './planAi'
+import { createItem, getStrategy, listItems, saveDayIdeas, saveGeneratedPlan, updateItem } from './plan'
+import { PlanContext, availableDates, buildDayPrompts, buildPlanPrompts, monthKey, monthRange, parseDayIdeas, parsePlan, targetCount } from './planAi'
 import type { BrandProfile } from './profile'
 
 const profile: BrandProfile = {
@@ -138,6 +138,43 @@ describe('parsePlan', () => {
   })
 })
 
+describe('regenerating one day', () => {
+  const owned = { id: 1, brandId: 1, platform: 'TikTok' as const, format: 'video' as const, pillar: '', notes: '', source: 'user' as const, edited: false, createdAt: '', updatedAt: '' }
+  const day = (over = {}) => ({ ...ctx({ dates: ['2026-11-10'], needed: 1 }), strategy, replacing: [], ...over })
+
+  it('asks for that day only, in the brand language, using the month strategy', () => {
+    const { system, prompt } = buildDayPrompts(day())
+    expect(system).toContain('Write every value in Russian')
+    expect(prompt).toContain('exactly 1 new post idea for')
+    expect(prompt).toContain('every idea must be 2026-11-10')
+    expect(prompt).toContain('2026-11-10 (Tue)')
+    expect(prompt).toContain('Показать работы')
+  })
+
+  it('names the rejected ideas and the ones that stay', () => {
+    const { prompt } = buildDayPrompts(day({
+      replacing: [{ ...owned, date: '2026-11-10', title: 'Отвергнутая' }],
+      kept: [{ ...owned, date: '2026-11-20', title: 'Другая идея месяца' }]
+    }))
+    expect(prompt).toContain('The owner rejected these')
+    expect(prompt).toContain('Отвергнутая')
+    expect(prompt).toContain('Другая идея месяца')
+  })
+
+  it('leaves out competitors and works without a strategy', () => {
+    const { prompt } = buildDayPrompts(day({ strategy: null }))
+    expect(prompt).not.toContain('Secret Rival')
+    expect(prompt).not.toContain('Strategy for this month')
+  })
+
+  it('accepts only the requested date', () => {
+    const c = day()
+    expect(parseDayIdeas(JSON.stringify({ items: [item()] }), c)).toHaveLength(1)
+    expect(() => parseDayIdeas(JSON.stringify({ items: [item({ date: '2026-11-11' })] }), c)).toThrow(/usable/)
+    expect(() => parseDayIdeas('{}', c)).toThrow()
+  })
+})
+
 describe('saveGeneratedPlan', () => {
   let dir: string
   let db: Db
@@ -184,6 +221,28 @@ describe('saveGeneratedPlan', () => {
     saveGeneratedPlan(db, { brandId, month: '2026-11', from: '2026-11-09', to: '2026-11-30', strategy: { ...strategy, focus: 'Новый фокус' }, items: [] })
     expect(getStrategy(db, brandId, '2026-11')?.focus).toBe('Новый фокус')
     expect(getStrategy(db, brandId, '2026-12')).toBeNull()
+  })
+
+  it('replaces untouched AI ideas of one day and nothing else', () => {
+    createItem(db, { ...base, brandId, source: 'ai', title: 'old ai' })
+    createItem(db, { ...base, brandId, source: 'user', title: 'mine' })
+    const moved = createItem(db, { ...base, brandId, source: 'ai', date: '2026-11-14', title: 'moved here' })
+    updateItem(db, moved.id, { date: '2026-11-15' })
+    createItem(db, { ...base, brandId, source: 'ai', date: '2026-11-16', title: 'next day' })
+    save()
+    db.prepare('DELETE FROM content_plans').run()
+    createItem(db, { ...base, brandId, source: 'ai', date: '2026-11-16', title: 'next day' })
+    expect(saveDayIdeas(db, brandId, '2026-11-15', [{ ...base, title: 'fresh' }])).toBe(1)
+    const day = listItems(db, brandId, '2026-11-15', '2026-11-15').map((i) => i.title).sort()
+    expect(day).toEqual(['fresh', 'mine', 'moved here'])
+    expect(listItems(db, brandId, '2026-11-16', '2026-11-16').map((i) => i.title)).toContain('next day')
+    expect(getStrategy(db, brandId, '2026-11')).toBeNull()
+  })
+
+  it('keeps the old ideas of a day if saving fails halfway', () => {
+    createItem(db, { ...base, brandId, source: 'ai', title: 'old ai' })
+    expect(() => saveDayIdeas(db, brandId, base.date, [{ ...base, title: null as unknown as string }])).toThrow()
+    expect(titles()).toEqual(['old ai'])
   })
 
   it('changes nothing if saving fails halfway', () => {

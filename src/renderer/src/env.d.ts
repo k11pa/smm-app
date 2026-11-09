@@ -35,6 +35,7 @@ declare global {
         delete(id: number): Promise<Result<{}>>
         getStrategy(input: { brandId: number; year: number; month: number }): Promise<Result<{ strategy: MonthStrategy | null }>>
         generate(input: { brandId: number; year: number; month: number; postsPerWeek: number }): Promise<Result<{ strategy: MonthStrategy; created: number }>>
+        regenerateDay(input: { brandId: number; date: string }): Promise<Result<{ created: number }>>
       }
     }
   }

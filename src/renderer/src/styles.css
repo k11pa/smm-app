@@ -65,7 +65,10 @@ label.inline { margin: 0; }
 .daynum { font-size: 12px; font-weight: 600; padding: 1px 6px; border-radius: 999px; }
 .cell.today .daynum { background: var(--accent); color: var(--accent-text); }
 button.add { opacity: 0; font-size: 16px; line-height: 1; padding: 0 4px; }
-.cell:hover button.add, button.add:focus-visible { opacity: 1; }
+.cell:hover button.add, button.add:focus-visible, button.add.busy { opacity: 1; }
+.cell:hover button.add:disabled { opacity: .4; }
+button.add.busy:disabled { opacity: 1; }
+.day-actions { display: flex; gap: 2px; }
 .chip { display: block; width: 100%; text-align: start; padding: 4px 6px; border-radius: 6px; background: var(--bg); white-space: normal; cursor: grab; font-size: 12px; line-height: 1.3; }
 .chip:active { cursor: grabbing; }
 .chip-meta { display: block; color: var(--muted); font-size: 11px; }

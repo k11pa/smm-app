@@ -102,6 +102,15 @@ export function saveGeneratedPlan(
   })()
 }
 
+// The same protection as a month, for one day; the month's strategy is not touched.
+export function saveDayIdeas(db: Db, brandId: number, date: string, items: Omit<NewPlanItem, 'brandId' | 'source'>[]): number {
+  return db.transaction(() => {
+    db.prepare(`DELETE FROM plan_items WHERE brand_id = ? AND date = ? AND source = 'ai' AND edited = 0`).run(brandId, date)
+    for (const item of items) createItem(db, { ...item, brandId, source: 'ai' })
+    return items.length
+  })()
+}
+
 export function deleteItem(db: Db, id: number): boolean {
   return db.prepare('DELETE FROM plan_items WHERE id = ?').run(id).changes > 0
 }

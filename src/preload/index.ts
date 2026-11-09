@@ -20,7 +20,8 @@ const api = {
     update: (input: unknown) => ipcRenderer.invoke('plan:update', input),
     delete: (id: number) => ipcRenderer.invoke('plan:delete', id),
     getStrategy: (input: unknown) => ipcRenderer.invoke('plan:getStrategy', input),
-    generate: (input: unknown) => ipcRenderer.invoke('plan:generate', input)
+    generate: (input: unknown) => ipcRenderer.invoke('plan:generate', input),
+    regenerateDay: (input: unknown) => ipcRenderer.invoke('plan:regenerateDay', input)
   }
 }
 

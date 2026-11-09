@@ -18,7 +18,9 @@ const api = {
     list: (input: unknown) => ipcRenderer.invoke('plan:list', input),
     create: (input: unknown) => ipcRenderer.invoke('plan:create', input),
     update: (input: unknown) => ipcRenderer.invoke('plan:update', input),
-    delete: (id: number) => ipcRenderer.invoke('plan:delete', id)
+    delete: (id: number) => ipcRenderer.invoke('plan:delete', id),
+    getStrategy: (input: unknown) => ipcRenderer.invoke('plan:getStrategy', input),
+    generate: (input: unknown) => ipcRenderer.invoke('plan:generate', input)
   }
 }
 

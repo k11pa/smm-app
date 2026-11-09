@@ -1,9 +1,10 @@
 import { DragEvent, useEffect, useMemo, useState } from 'react'
 import type { BrandProfile } from '../../../main/profile'
-import { Brand, PLATFORMS, POST_FORMATS, PlanItem, Platform, PostFormat, Settings } from '../../../shared'
+import { Brand, MonthStrategy, PLATFORMS, POST_FORMATS, PlanItem, Platform, PostFormat, Settings } from '../../../shared'
 import { isInMonth, monthGrid, shiftMonth, todayIso, weekStartFor } from '../calendar'
 import type { PlanItemFields } from '../env'
 import { TKey, useT } from '../i18n'
+import { useErrorText } from './Brand'
 
 const FORMAT_LABEL: Record<PostFormat, TKey> = {
   post: 'format_post',
@@ -28,6 +29,13 @@ export default function Plan({ settings, goBrand }: { settings: Settings; goBran
   const [editing, setEditing] = useState<Editing | null>(null)
   const [dropTarget, setDropTarget] = useState<string | null>(null)
   const [error, setError] = useState('')
+  const [strategy, setStrategy] = useState<MonthStrategy | null>(null)
+  const [postsPerWeek, setPostsPerWeek] = useState(3)
+  const [generating, setGenerating] = useState(false)
+  const [notice, setNotice] = useState('')
+  const [reloadTick, setReloadTick] = useState(0)
+  const errorText = useErrorText()
+  const hasKey = settings.ai.hasKey[settings.ai.provider]
 
   const today = todayIso()
   const days = useMemo(
@@ -55,7 +63,34 @@ export default function Plan({ settings, goBrand }: { settings: Settings; goBran
       else setError(r.error)
     })
     return () => { current = false }
-  }, [brand, from, to])
+  }, [brand, from, to, reloadTick])
+
+  useEffect(() => {
+    if (!brand) return
+    let current = true
+    setStrategy(null)
+    setNotice('')
+    window.api.plan.getStrategy({ brandId: brand.id, year: view.year, month: view.month }).then((r) => {
+      if (current && r.ok) setStrategy(r.strategy)
+    })
+    return () => { current = false }
+  }, [brand, view, reloadTick])
+
+  const next = shiftMonth(view.year, view.month, 1)
+  const monthIsPast = `${next.year}-${String(next.month + 1).padStart(2, '0')}-01` <= today
+  const replaceable = items.filter((i) => isInMonth(i.date, view.year, view.month) && i.date >= today && i.source === 'ai' && !i.edited).length
+
+  async function generate() {
+    if (!brand) return
+    if (replaceable > 0 && !window.confirm(t('plan_regen_confirm'))) return
+    const target = view
+    setGenerating(true); setError(''); setNotice('')
+    const r = await window.api.plan.generate({ brandId: brand.id, year: target.year, month: target.month, postsPerWeek })
+    setGenerating(false)
+    if (!r.ok) return setError(errorText(r.error))
+    setReloadTick((n) => n + 1)
+    setNotice(`${t('plan_generated')}: ${r.created}`)
+  }
 
   const formatDay = (options: Intl.DateTimeFormatOptions, iso: string) =>
     new Intl.DateTimeFormat(settings.language, { ...options, timeZone: 'UTC' }).format(new Date(`${iso}T00:00:00Z`))
@@ -133,6 +168,29 @@ export default function Plan({ settings, goBrand }: { settings: Settings; goBran
       </div>
       {error && <p className="error">{error}</p>}
 
+      <div className="card plan-ai">
+        {strategy && (
+          <div className="strategy" dir="auto">
+            <h3>{t('plan_strategy')}</h3>
+            <p>{strategy.focus}</p>
+            {strategy.themes.length > 0 && <ul>{strategy.themes.map((theme) => <li key={theme}>{theme}</li>)}</ul>}
+            {strategy.rhythm && <p className="muted">{strategy.rhythm}</p>}
+          </div>
+        )}
+        {!profile && <p className="warn">{t('plan_no_brand')} <button className="link" onClick={goBrand}>{t('plan_go_brand')} →</button></p>}
+        {!hasKey && <p className="warn">{t('no_key')}</p>}
+        {monthIsPast && <p className="muted small">{t('plan_month_past')}</p>}
+        <div className="row flush plan-generate">
+          <label className="inline" htmlFor="posts-per-week">{t('plan_posts_per_week')}</label>
+          <input id="posts-per-week" type="number" min={1} max={14} value={postsPerWeek} onChange={(e) => setPostsPerWeek(Math.min(14, Math.max(1, Number(e.target.value) || 1)))} />
+          <button className="primary" disabled={generating || !hasKey || !profile || monthIsPast} onClick={generate}>
+            {generating ? t('plan_generating') : strategy ? t('plan_regenerate') : t('plan_generate')}
+          </button>
+          {!generating && notice && <span className="ok">{notice}</span>}
+        </div>
+        <p className="muted small spaced">{t('plan_generate_hint')} {settings.ai.provider} · {settings.ai.model}</p>
+      </div>
+
       <div className="grid" role="grid">
         {days.slice(0, 7).map((d) => <div key={d} className="weekday">{formatDay({ weekday: 'short' }, d)}</div>)}
         {days.map((date) => (
@@ -159,7 +217,7 @@ export default function Plan({ settings, goBrand }: { settings: Settings; goBran
                 onDragEnd={() => setDropTarget(null)}
                 onClick={() => setEditing({ item: i })}
               >
-                <span className="chip-meta">{i.platform}</span>
+                <span className="chip-meta">{i.platform}{i.source === 'ai' && !i.edited ? ' · AI' : ''}</span>
                 <span className="chip-title">{i.title}</span>
               </button>
             ))}

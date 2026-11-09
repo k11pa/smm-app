@@ -1,4 +1,4 @@
-import type { PlanItem, Platform, PostFormat, ProfileSource } from '../shared'
+import type { MonthStrategy, PlanItem, Platform, PostFormat, ProfileSource } from '../shared'
 import type { Db } from './db'
 
 interface ItemRow {
@@ -77,6 +77,29 @@ export function updateItem(db: Db, id: number, changes: PlanItemChanges): PlanIt
     `UPDATE plan_items SET date = ?, platform = ?, format = ?, pillar = ?, title = ?, notes = ?, edited = 1, updated_at = ? WHERE id = ?`
   ).run(next.date, next.platform, next.format, next.pillar, next.title, next.notes, new Date().toISOString(), id)
   return getItem(db, id)
+}
+
+export function getStrategy(db: Db, brandId: number, month: string): MonthStrategy | null {
+  const row = db.prepare('SELECT strategy FROM content_plans WHERE brand_id = ? AND month = ?').get(brandId, month) as { strategy: string } | undefined
+  return row ? JSON.parse(row.strategy) : null
+}
+
+// Replaces only untouched AI ideas in the range, in one transaction: a failure leaves the old plan as it was.
+export function saveGeneratedPlan(
+  db: Db,
+  input: { brandId: number; month: string; from: string; to: string; strategy: MonthStrategy; items: Omit<NewPlanItem, 'brandId' | 'source'>[] }
+): number {
+  const { brandId, month, from, to, strategy, items } = input
+  return db.transaction(() => {
+    db.prepare(`DELETE FROM plan_items WHERE brand_id = ? AND date >= ? AND date <= ? AND source = 'ai' AND edited = 0`).run(brandId, from, to)
+    for (const item of items) createItem(db, { ...item, brandId, source: 'ai' })
+    const now = new Date().toISOString()
+    db.prepare(
+      `INSERT INTO content_plans (brand_id, month, strategy, created_at, updated_at) VALUES (?, ?, ?, ?, ?)
+       ON CONFLICT (brand_id, month) DO UPDATE SET strategy = excluded.strategy, updated_at = excluded.updated_at`
+    ).run(brandId, month, JSON.stringify(strategy), now, now)
+    return items.length
+  })()
 }
 
 export function deleteItem(db: Db, id: number): boolean {

@@ -47,6 +47,14 @@ button.danger { color: var(--err); }
 .plan-title { margin: 0; }
 .plan-title::first-letter { text-transform: uppercase; }
 .row.flush { margin-top: 0; }
+.card.plan-ai { max-width: none; margin-bottom: 14px; padding: 14px 20px; }
+.strategy { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border); line-height: 1.5; }
+.strategy h3 { margin: 0 0 6px; font-size: 14px; }
+.strategy p { margin: 0 0 6px; }
+.strategy ul { margin: 0 0 6px; padding-inline-start: 20px; }
+.plan-generate { flex-wrap: wrap; }
+label.inline { margin: 0; }
+.plan-generate input[type='number'] { width: 72px; flex: none; }
 .grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
 .weekday { background: var(--panel); color: var(--muted); font-size: 12px; font-weight: 600; padding: 8px; text-align: center; text-transform: capitalize; }
 .cell { background: var(--panel); min-height: 108px; padding: 6px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }

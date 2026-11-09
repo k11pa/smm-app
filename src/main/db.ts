@@ -41,6 +41,17 @@ const MIGRATIONS: string[] = [
   );
 
   CREATE INDEX plan_items_brand_date ON plan_items (brand_id, date);
+  `,
+  `
+  CREATE TABLE content_plans (
+    id INTEGER PRIMARY KEY,
+    brand_id INTEGER NOT NULL REFERENCES brands(id) ON DELETE CASCADE,
+    month TEXT NOT NULL,
+    strategy TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    UNIQUE (brand_id, month)
+  );
   `
 ]
 

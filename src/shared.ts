@@ -45,6 +45,19 @@ export interface PlanItem {
   updatedAt: string
 }
 
+export interface MonthStrategy {
+  focus: string
+  themes: string[]
+  rhythm: string
+}
+
+// Dates are plain YYYY-MM-DD strings computed in UTC, so a timezone or daylight saving change can't shift a post to another day.
+export const toIso = (d: Date) => d.toISOString().slice(0, 10)
+
+export function todayIso(now = new Date()) {
+  return toIso(new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())))
+}
+
 export const PROFILE_SECTIONS = ['about', 'audience', 'tone', 'pillars', 'competitors', 'markets', 'platforms', 'goals'] as const
 export type ProfileSection = (typeof PROFILE_SECTIONS)[number]
 

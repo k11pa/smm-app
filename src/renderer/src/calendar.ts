@@ -1,10 +1,6 @@
-// Dates are plain YYYY-MM-DD strings computed in UTC, so a timezone or daylight saving change can't shift a post to another day.
+import { toIso } from '../../shared'
 
-export const toIso = (d: Date) => d.toISOString().slice(0, 10)
-
-export function todayIso(now = new Date()) {
-  return toIso(new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())))
-}
+export { todayIso } from '../../shared'
 
 // 0 is Sunday. Israeli and Arabic-language calendars start on Sunday; until brands have countries, the language decides.
 export const weekStartFor = (brandLanguage: string) => (brandLanguage === 'he' || brandLanguage === 'ar' ? 0 : 1)

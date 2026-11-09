@@ -12,9 +12,13 @@ interface ItemRow {
   notes: string
   source: ProfileSource
   edited: number
+  has_post: number
   created_at: string
   updated_at: string
 }
+
+// A post counts only for the platform the idea is on now.
+const SELECT_ITEM = `SELECT p.*, EXISTS (SELECT 1 FROM posts x WHERE x.plan_item_id = p.id AND x.platform = p.platform) AS has_post FROM plan_items p`
 
 export interface NewPlanItem {
   brandId: number
@@ -40,19 +44,20 @@ const toItem = (r: ItemRow): PlanItem => ({
   notes: r.notes,
   source: r.source,
   edited: r.edited === 1,
+  hasPost: r.has_post === 1,
   createdAt: r.created_at,
   updatedAt: r.updated_at
 })
 
 export function getItem(db: Db, id: number): PlanItem | null {
-  const row = db.prepare('SELECT * FROM plan_items WHERE id = ?').get(id) as ItemRow | undefined
+  const row = db.prepare(`${SELECT_ITEM} WHERE p.id = ?`).get(id) as ItemRow | undefined
   return row ? toItem(row) : null
 }
 
 // Both ends of the range are included.
 export function listItems(db: Db, brandId: number, from: string, to: string): PlanItem[] {
   const rows = db
-    .prepare('SELECT * FROM plan_items WHERE brand_id = ? AND date >= ? AND date <= ? ORDER BY date, id')
+    .prepare(`${SELECT_ITEM} WHERE p.brand_id = ? AND p.date >= ? AND p.date <= ? ORDER BY p.date, p.id`)
     .all(brandId, from, to) as ItemRow[]
   return rows.map(toItem)
 }

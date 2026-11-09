@@ -71,7 +71,7 @@ describe('dates', () => {
 })
 
 describe('buildPlanPrompts', () => {
-  const built = buildPlanPrompts(ctx({ kept: [{ id: 1, brandId: 1, date: '2026-11-12', platform: 'TikTok', format: 'video', pillar: '', title: 'Моя идея', notes: '', source: 'user', edited: false, createdAt: '', updatedAt: '' }] }))
+  const built = buildPlanPrompts(ctx({ kept: [{ id: 1, brandId: 1, date: '2026-11-12', platform: 'TikTok', format: 'video', pillar: '', title: 'Моя идея', notes: '', source: 'user', edited: false, hasPost: false, createdAt: '', updatedAt: '' }] }))
 
   it('writes in the brand language', () => {
     expect(built.system).toContain('Write every value in Russian')
@@ -139,7 +139,7 @@ describe('parsePlan', () => {
 })
 
 describe('regenerating one day', () => {
-  const owned = { id: 1, brandId: 1, platform: 'TikTok' as const, format: 'video' as const, pillar: '', notes: '', source: 'user' as const, edited: false, createdAt: '', updatedAt: '' }
+  const owned = { id: 1, brandId: 1, platform: 'TikTok' as const, format: 'video' as const, pillar: '', notes: '', source: 'user' as const, edited: false, hasPost: false, createdAt: '', updatedAt: '' }
   const day = (over = {}) => ({ ...ctx({ dates: ['2026-11-10'], needed: 1 }), strategy, replacing: [], ...over })
 
   it('asks for that day only, in the brand language, using the month strategy', () => {

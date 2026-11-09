@@ -6,7 +6,7 @@ import type { PlanItemFields } from '../env'
 import { TKey, useT } from '../i18n'
 import { useErrorText } from './Brand'
 
-const FORMAT_LABEL: Record<PostFormat, TKey> = {
+export const FORMAT_LABEL: Record<PostFormat, TKey> = {
   post: 'format_post',
   carousel: 'format_carousel',
   reel: 'format_reel',
@@ -16,7 +16,7 @@ const FORMAT_LABEL: Record<PostFormat, TKey> = {
 
 type Editing = { item: PlanItem } | { date: string }
 
-export default function Plan({ settings, goBrand }: { settings: Settings; goBrand: () => void }) {
+export default function Plan({ settings, goBrand, onWrite }: { settings: Settings; goBrand: () => void; onWrite: (itemId: number) => void }) {
   const t = useT()
   const [brand, setBrand] = useState<Brand | null>(null)
   const [profile, setProfile] = useState<BrandProfile | null>(null)
@@ -243,7 +243,7 @@ export default function Plan({ settings, goBrand }: { settings: Settings; goBran
                 onDragEnd={() => setDropTarget(null)}
                 onClick={() => setEditing({ item: i })}
               >
-                <span className="chip-meta">{i.platform}{i.source === 'ai' && !i.edited ? ' · AI' : ''}</span>
+                <span className="chip-meta">{i.platform}{i.source === 'ai' && !i.edited ? ' · AI' : ''}{i.hasPost ? ' · ✓' : ''}</span>
                 <span className="chip-title">{i.title}</span>
               </button>
             ))}
@@ -262,6 +262,7 @@ export default function Plan({ settings, goBrand }: { settings: Settings; goBran
           pillars={profile?.pillars.map((p) => p.name) ?? []}
           onSave={save}
           onDelete={remove}
+          onWrite={onWrite}
           onClose={() => setEditing(null)}
         />
       )}
@@ -276,9 +277,10 @@ function ItemForm(props: {
   pillars: string[]
   onSave: (fields: PlanItemFields) => Promise<boolean>
   onDelete: (id: number) => Promise<boolean>
+  onWrite: (itemId: number) => void
   onClose: () => void
 }) {
-  const { item, defaultPlatform, onSave, onDelete, onClose } = props
+  const { item, defaultPlatform, onSave, onDelete, onWrite, onClose } = props
   const t = useT()
   const [date, setDate] = useState(props.date)
   const [platform, setPlatform] = useState<Platform>(item?.platform ?? defaultPlatform)
@@ -326,7 +328,8 @@ function ItemForm(props: {
         <div className="row">
           <button className="primary" disabled={busy || !title.trim() || !date} onClick={() => run(() => onSave({ date, platform, format, pillar, title: title.trim(), notes: notes.trim() }))}>{t('plan_save')}</button>
           <button disabled={busy} onClick={onClose}>{t('plan_cancel')}</button>
-          {item && <button className="link danger push" disabled={busy} onClick={() => { if (window.confirm(t('plan_delete_confirm'))) run(() => onDelete(item.id)) }}>{t('remove_item')}</button>}
+          {item && <button disabled={busy} onClick={() => onWrite(item.id)}>{item.hasPost ? t('post_open') : t('post_write')}</button>}
+          {item && <button className="link danger push" disabled={busy} onClick={() => { if (window.confirm(item.hasPost ? t('plan_delete_post_confirm') : t('plan_delete_confirm'))) run(() => onDelete(item.id)) }}>{t('remove_item')}</button>}
         </div>
       </div>
     </div>

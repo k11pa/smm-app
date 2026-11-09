@@ -42,6 +42,14 @@ button.danger { color: var(--err); }
 .badge { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--bg); border: 1px solid var(--border); }
 .badge.unverified { background: var(--warn-bg); }
 [hidden] { display: none !important; }
+.content-page { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 16px; align-items: start; max-width: 1200px; }
+.idea-list { display: flex; flex-direction: column; gap: 4px; max-height: calc(100vh - 56px); overflow: auto; }
+.idea-list h2 { margin-bottom: 8px; }
+.idea-row { display: block; width: 100%; text-align: start; white-space: normal; font-size: 13px; line-height: 1.35; flex: none; }
+.idea-row.active { border-color: var(--accent); outline: 1px solid var(--accent); }
+.idea-row.past { opacity: .6; }
+.post-card h2 { margin: 6px 0; }
+.post-card .small { margin-top: 0; }
 .plan { max-width: 1200px; }
 .plan-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
 .plan-title { margin: 0; }

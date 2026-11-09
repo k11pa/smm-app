@@ -39,11 +39,56 @@ export interface PlanItem {
   title: string
   notes: string
   source: ProfileSource
-  // True once the owner changed the item; regeneration must leave it alone.
+  // True once the owner changed the item or a post was written for it; regeneration must leave it alone.
   edited: boolean
+  hasPost: boolean
   createdAt: string
   updatedAt: string
 }
+
+export interface Post {
+  planItemId: number
+  platform: Platform
+  version: number
+  body: string
+  hashtags: string[]
+  source: ProfileSource
+  createdAt: string
+}
+
+// Published limits disagree between sources, so these are the cautious ones. The UI warns; only generated text must fit.
+const PLATFORM_LIMITS: Record<Platform, { chars: number; hashtags: number }> = {
+  Instagram: { chars: 2200, hashtags: 5 },
+  Facebook: { chars: 10000, hashtags: 3 },
+  TikTok: { chars: 2200, hashtags: 5 },
+  LinkedIn: { chars: 3000, hashtags: 5 },
+  X: { chars: 280, hashtags: 2 },
+  Telegram: { chars: 4096, hashtags: 3 }
+}
+
+const TELEGRAM_CAPTION_CHARS = 1024
+
+export function postLimits(platform: Platform, format: PostFormat) {
+  const limits = PLATFORM_LIMITS[platform]
+  return platform === 'Telegram' && format === 'video' ? { ...limits, chars: TELEGRAM_CAPTION_CHARS } : limits
+}
+
+export function normalizeHashtags(values: string[]): string[] {
+  const seen = new Set<string>()
+  const result: string[] = []
+  for (const value of values.flatMap((v) => v.split(/[\s,]+/))) {
+    const tag = value.replace(/^#+/, '').replace(/[^\p{L}\p{M}\p{N}_]/gu, '')
+    if (!tag || seen.has(tag.toLowerCase())) continue
+    seen.add(tag.toLowerCase())
+    result.push(`#${tag}`)
+  }
+  return result
+}
+
+export const composePost = (body: string, hashtags: string[]) => (hashtags.length ? `${body.trim()}\n\n${hashtags.join(' ')}` : body.trim())
+
+// Counts whole characters, so an emoji counts once. A platform's own counter may differ slightly, for example on X.
+export const charCount = (text: string) => [...text].length
 
 export interface MonthStrategy {
   focus: string

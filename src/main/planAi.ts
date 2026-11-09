@@ -51,7 +51,7 @@ const weekday = (iso: string) => new Intl.DateTimeFormat('en', { weekday: 'short
 const ITEM_SHAPE = '{ "date": string, "platform": string, "format": string, "pillar": string, "title": string, "notes": string }'
 
 // Competitors are left out: unchecked suggestions must not reach post ideas.
-function profileBlock(profile: BrandProfile) {
+export function profileBlock(profile: BrandProfile) {
   const { summary, products, usp, proofPoints, audience, tone, avoid, pillars, markets, goals } = profile
   return `<current_profile>\n${JSON.stringify({ summary, products, usp, proofPoints, audience, tone, avoid, pillars, markets, goals })}\n</current_profile>`
 }

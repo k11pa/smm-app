@@ -52,6 +52,19 @@ const MIGRATIONS: string[] = [
     updated_at TEXT NOT NULL,
     UNIQUE (brand_id, month)
   );
+  `,
+  `
+  CREATE TABLE posts (
+    id INTEGER PRIMARY KEY,
+    plan_item_id INTEGER NOT NULL REFERENCES plan_items(id) ON DELETE CASCADE,
+    platform TEXT NOT NULL,
+    version INTEGER NOT NULL,
+    body TEXT NOT NULL,
+    hashtags TEXT NOT NULL,
+    source TEXT NOT NULL CHECK (source IN ('ai', 'user')),
+    created_at TEXT NOT NULL,
+    UNIQUE (plan_item_id, platform, version)
+  );
   `
 ]
 

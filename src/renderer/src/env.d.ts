@@ -1,5 +1,5 @@
 import type { BrandAnswers, BrandProfile } from '../../main/profile'
-import type { Brand, ChatResult, MonthStrategy, PlanItem, ProfileSection, ProfileSource, ProviderId, Settings } from '../../shared'
+import type { Brand, ChatResult, MonthStrategy, PlanItem, Post, ProfileSection, ProfileSource, ProviderId, Settings } from '../../shared'
 
 type Failure = { ok: false; error: string }
 type Result<T> = ({ ok: true } & T) | Failure
@@ -36,6 +36,11 @@ declare global {
         getStrategy(input: { brandId: number; year: number; month: number }): Promise<Result<{ strategy: MonthStrategy | null }>>
         generate(input: { brandId: number; year: number; month: number; postsPerWeek: number }): Promise<Result<{ strategy: MonthStrategy; created: number }>>
         regenerateDay(input: { brandId: number; date: string }): Promise<Result<{ created: number }>>
+      }
+      post: {
+        get(planItemId: number): Promise<Result<{ post: Post | null }>>
+        generate(planItemId: number): Promise<Result<{ post: Post }>>
+        save(input: { planItemId: number; body: string; hashtags: string[] }): Promise<Result<{ post: Post }>>
       }
     }
   }
